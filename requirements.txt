@@ -4,4 +4,4 @@ pandas
 openpyxl
 python-docx
 reportlab
-imghdr
+imghdr-fix
