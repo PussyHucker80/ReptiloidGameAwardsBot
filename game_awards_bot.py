@@ -539,7 +539,7 @@ def main():
     init_db()
 
     # --- ИНИЦИАЛИЗАЦИЯ ДЛЯ PTB 20.X (ApplicationBuilder) ---
-    app = ApplicationBuilder().token(TOKEN).build()
+    app = Application.builder().token(TOKEN).build() # <--- Использовать Application
 
     # Handlers
     app.add_handler(CommandHandler("start", start))
