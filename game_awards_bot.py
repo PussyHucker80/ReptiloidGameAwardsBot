@@ -537,7 +537,7 @@ def main():
 
     init_db()
 
-    app = ApplicationBuilder().token(TOKEN).build()
+   app = Application.builder().token(TOKEN).build()
 
     # Handlers
     app.add_handler(CommandHandler("start", start))
