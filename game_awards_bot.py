@@ -24,7 +24,8 @@ from telegram import (
     Poll,
 )
 from telegram.ext import (
-    Updater, # <-- Использовать Updater
+    Application, # <--- ИСПОЛЬЗУЕМ Application
+    ApplicationBuilder, # <--- ИСПОЛЬЗУЕМ ApplicationBuilder
     ContextTypes,
     CommandHandler,
     CallbackQueryHandler,
@@ -537,25 +538,25 @@ def main():
 
     init_db()
 
-    # --- ИНИЦИАЛИЗАЦИЯ ДЛЯ PTB 13.X ---
-    # use_context=True ОБЯЗАТЕЛЕН для совместимости с кодом, написанным для PTB 20
-    updater = Updater(TOKEN, use_context=True)
-    app = updater.dispatcher # В PTB 13.x обработчики добавляются к dispatcher
+    # --- ИНИЦИАЛИЗАЦИЯ ДЛЯ PTB 20.X (ApplicationBuilder) ---
+    app = ApplicationBuilder().token(TOKEN).build()
 
     # Handlers
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("list_categories", list_categories_cmd))
     app.add_handler(CommandHandler("list_games", list_games_cmd))
     app.add_handler(CallbackQueryHandler(button_router))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, text_message_handler))
-    app.add_handler(MessageHandler(filters.UpdateType.POLL_ANSWER, lambda u, c: None)) # placeholder
-    # PollAnswer обработчик: нужно использовать специальный обработчик через .add_handler, но PTB требует PollAnswerHandler — мы используем фильтр UpdateType.POLL_ANSWER
+    # В PTB 20.x PollAnswerHandler не нужен, MessageHandler с фильтром UpdateType.POLL_ANSWER не работает
+    # Мы используем специальный хендлер PollAnswerHandler
     from telegram.ext import PollAnswerHandler
     app.add_handler(PollAnswerHandler(poll_answer_handler))
-
+    
+    # Должен быть последним, чтобы обработать обычный текст
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, text_message_handler))
+    
     print("Bot started...")
-    # --- ЗАПУСК ДЛЯ PTB 13.X ---
-    updater.start_polling() # <--- Запуск через updater
-
+    # --- ЗАПУСК ДЛЯ PTB 20.X (run_polling) ---
+    app.run_polling(poll_interval=1.0) # <--- Запуск через Application
+    
 if __name__ == "__main__":
     main()
